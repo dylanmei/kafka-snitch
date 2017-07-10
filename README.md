@@ -3,10 +3,16 @@ kafka-snitch
 
 A simple application to observe interesting details from a [Kafka](http://kafka.apache.org) 0.9+ cluster, including consumer group lag.
 
+`kafka-snitch` observes these details:
+
+- [x] consumer group lag
+- [ ] empty topics 
+
 `kafka-snitch` supports these reporters:
 
-- logger
-- influxdb
+- [x] logger
+- [x] influxdb
+- [ ] prometheus
 
 # example
 
