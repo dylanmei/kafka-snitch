@@ -33,7 +33,7 @@ bin/kafka-snitch -brokers=localhost:9092 \
   -observe.broker=2 -observe.broker=4
 ```
 
-That's a contrived example, but `-observe.broker` comes in handy (speed and siplicity) when running these as sidecars or on each host alongside a broker process.
+That's a contrived example, but `-observe.broker` comes in handy (speed and simplicity) when running these as sidecar containers or on each host alongside a broker process.
 
 ## notes
 
