@@ -33,6 +33,10 @@ bin/kafka-snitch -brokers=localhost:9092 \
   -observe.broker=2 -observe.broker=4
 ```
 
+That's a contrived example, but `-observe.broker` comes in handy (speed and siplicity) when running these as sidecars or on each host alongside a broker process.
+
 ## notes
+
+There's a Docker container here: https://hub.docker.com/r/dylanmei/kafka-snitch
 
 We're currently using [dep](https://github.com/golang/dep) for vendoring.
