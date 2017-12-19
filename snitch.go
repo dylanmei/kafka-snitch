@@ -169,10 +169,11 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 		return
 	}
 
-	for group, t := range groupsResponse.Groups {
-		if t != "consumer" {
-			continue
-		}
+	for group, protocolType := range groupsResponse.Groups {
+		log.WithFields(log.Fields{
+			"group":        group,
+			"protocolType": protocolType,
+		}).Debug("Found group.")
 
 		for topic, data := range topicSet {
 			offsetsRequest := new(sarama.OffsetFetchRequest)
