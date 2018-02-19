@@ -35,7 +35,7 @@ func main() {
 
 	snitch := NewSnitch(observer, &config.Observe)
 	brokers := strings.Split(config.Brokers, ",")
-	log.Infof("Starting snitch.")
+	log.Infof("Starting snitch")
 
 	select {
 	case <-snitch.Connect(brokers):
@@ -43,16 +43,16 @@ func main() {
 		break
 
 	case <-time.After(60 * time.Second):
-		log.Fatal("Couldn't start snitch! Quitting.")
+		log.Fatal("Couldn't start snitch! Quitting")
 	}
 
 	termCh := make(chan os.Signal)
 	signal.Notify(termCh, os.Interrupt, syscall.SIGTERM)
 	<-termCh
 
-	log.Infof("Stopping snitch.")
+	log.Infof("Stopping snitch")
 	snitch.Close()
 	observer.Flush()
 
-	log.Infof("Done.")
+	log.Infof("Done!")
 }

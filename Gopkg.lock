@@ -26,6 +26,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/docker/go-units"
+  packages = ["."]
+  revision = "0dadbb0345b35ec7ef35e228dabb8de89a65bf52"
+  version = "v0.3.2"
+
+[[projects]]
   name = "github.com/eapache/go-resiliency"
   packages = ["breaker"]
   revision = "6800482f2c813e689c88b7ed3282262385011890"
@@ -98,6 +104,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3149b7c87fb3ee6d71cb1bee5cc4e6c57298ccb78bb0eb33e5a15eb542df038b"
+  inputs-digest = "b0d2cbb4f2969ab95547217f2cbe3f810a6d0b3f37ee45e8227d64dfcf97d812"
   solver-name = "gps-cdcl"
   solver-version = 1

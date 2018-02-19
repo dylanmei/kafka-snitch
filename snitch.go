@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	log "github.com/Sirupsen/logrus"
+	units "github.com/docker/go-units"
 )
 
 type Snitch struct {
@@ -56,7 +57,7 @@ func (s *Snitch) Run() {
 	for {
 		select {
 		case <-time.After(10 * time.Second):
-			log.Info("Beginning observation.")
+			log.Info("Beginning observation")
 			observationStart := time.Now()
 
 			s.observe(tally)
@@ -66,18 +67,19 @@ func (s *Snitch) Run() {
 				tally.BrokerCount(), tally.TopicCount(), tally.GroupCount(), tally.PartitionCount())
 
 			log.WithFields(log.Fields{
-				"brokers":    tally.BrokerCount(),
-				"topics":     tally.TopicCount(),
-				"groups":     tally.GroupCount(),
-				"partitions": tally.PartitionCount(),
-			}).Infof("Observation complete in %v.", observationDuration)
+				"brokers":     tally.BrokerCount(),
+				"topics":      tally.TopicCount(),
+				"groups":      tally.GroupCount(),
+				"partitions":  tally.PartitionCount(),
+				"duration_ms": observationDuration.Nanoseconds() / 1000 / 1000,
+			}).Infof("Observation complete in %v", strings.ToLower(units.HumanDuration(observationDuration)))
 
 			tally.Reset()
 			break
 
 		case <-s.doneCh:
 			s.client.Close()
-			log.Info("Disconnected from the Kafka cluster.")
+			log.Info("Disconnected from the Kafka cluster")
 			s.termCh <- true
 			break
 		}
@@ -123,7 +125,7 @@ func (s *Snitch) observe(tally *Tally) {
 		}
 	}
 
-	log.Debugf("Refreshed %d topics.", len(topicSet))
+	log.Debugf("Refreshed %d topics", len(topicSet))
 
 	var wg sync.WaitGroup
 
@@ -145,7 +147,7 @@ func (s *Snitch) observe(tally *Tally) {
 		log.WithFields(log.Fields{
 			"broker": broker.ID(),
 			"addr":   broker.Addr(),
-		}).Debug("Connected to broker.")
+		}).Debugf("Connected to broker %s", broker.ID())
 
 		wg.Add(1)
 
@@ -173,7 +175,7 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 		log.WithFields(log.Fields{
 			"group":        group,
 			"protocolType": protocolType,
-		}).Debug("Found group.")
+		}).Debug("Found group")
 
 		for topic, data := range topicSet {
 			offsetsRequest := new(sarama.OffsetFetchRequest)
@@ -210,7 +212,7 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 						"partition":      partition,
 						"lag":            lag,
 						"broker":         broker.ID(),
-					}).Info("Observed group.")
+					}).Debugf("Observed %s consumer group on topic %s, partition %d", group, topic, partition)
 
 					tally.Add(broker.ID(), topic, group, partition)
 					s.observer.PartitionLag(group, topic, partition, logEndOffset, block.Offset, lag)
