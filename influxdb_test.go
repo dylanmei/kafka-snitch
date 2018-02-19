@@ -7,6 +7,33 @@ import (
 	influxdb "github.com/influxdata/influxdb/client/v2"
 )
 
+type DummyMetricsClient struct {
+	writeFunc func(influxdb.BatchPoints) error
+	closeFunc func() error
+}
+
+func (d DummyMetricsClient) Write(bp influxdb.BatchPoints) error {
+	if d.writeFunc != nil {
+		return d.writeFunc(bp)
+	}
+	return nil
+}
+
+func (d DummyMetricsClient) Close() error {
+	if d.closeFunc != nil {
+		return d.closeFunc()
+	}
+	return nil
+}
+
+func (d DummyMetricsClient) Query(q influxdb.Query) (*influxdb.Response, error) {
+	return &influxdb.Response{}, nil
+}
+
+func (d DummyMetricsClient) Ping(t time.Duration) (time.Duration, string, error) {
+	return 0 * time.Second, "", nil
+}
+
 func Test_metrics_writer_writes_a_point(t *testing.T) {
 	batchCh := make(chan influxdb.BatchPoints)
 	w, _ := newInfluxDBWriter(&InfluxDBConfig{BufferSize: 0}, DummyMetricsClient{

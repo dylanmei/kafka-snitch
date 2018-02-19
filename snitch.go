@@ -186,8 +186,8 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 			offsetsResponse, err := broker.FetchOffset(offsetsRequest)
 			if err != nil {
 				log.WithFields(log.Fields{
-					"group":  group,
-					"broker": broker.ID(),
+					"consumer_group": group,
+					"broker":         broker.ID(),
 				}).Errorf("Could not get offsets: %v", err)
 			}
 
@@ -198,22 +198,22 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 						continue
 					}
 
-					size := data[partition]
-					lag := data[partition] - block.Offset
+					logEndOffset := data[partition]
+					lag := logEndOffset - block.Offset
 					if lag < 0 {
 						lag = 0
 					}
 
 					log.WithFields(log.Fields{
-						"group":     group,
-						"topic":     topic,
-						"partition": partition,
-						"lag":       lag,
-						"broker":    broker.ID(),
+						"consumer_group": group,
+						"topic":          topic,
+						"partition":      partition,
+						"lag":            lag,
+						"broker":         broker.ID(),
 					}).Info("Observed group.")
 
 					tally.Add(broker.ID(), topic, group, partition)
-					s.observer.ConsumerGroup(topic, group, partition, size, block.Offset, lag)
+					s.observer.PartitionLag(group, topic, partition, logEndOffset, block.Offset, lag)
 				}
 			}
 		}

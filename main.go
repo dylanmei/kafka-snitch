@@ -14,13 +14,23 @@ func main() {
 	config := &SnitchConfig{}
 	config.Parse()
 
-	influxdbWriter, err := NewInfluxDBWriter(&config.InfluxDB)
-	if err != nil {
-		log.Panicf("Problem with InfluxDB config! %v", err)
+	observer := NewObserver()
+	if config.CanWriteToStatsD() {
+		writer, err := NewStatsDWriter(&config.StatsD)
+		if err != nil {
+			log.Panicf("Problem with StatsD config! %v", err)
+		}
+
+		observer.AddWriter(writer)
 	}
 
-	observer := &Observer{
-		writer: influxdbWriter,
+	if config.CanWriteToInfluxDB() {
+		writer, err := NewInfluxDBWriter(&config.InfluxDB)
+		if err != nil {
+			log.Panicf("Problem with InfluxDB config! %v", err)
+		}
+
+		observer.AddWriter(writer)
 	}
 
 	snitch := NewSnitch(observer, &config.Observe)
@@ -42,7 +52,7 @@ func main() {
 
 	log.Infof("Stopping snitch.")
 	snitch.Close()
-	observer.Close()
+	observer.Flush()
 
 	log.Infof("Done.")
 }

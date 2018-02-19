@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -29,9 +31,45 @@ func NewInfluxDBWriter(config *InfluxDBConfig) (*InfluxDBWriter, error) {
 	return newInfluxDBWriter(config, client)
 }
 
-func emptyInfluxDBWriter() *InfluxDBWriter {
-	w, _ := newInfluxDBWriter(&InfluxDBConfig{}, DummyMetricsClient{})
-	return w
+func (w *InfluxDBWriter) WriteConsumerTopicLag(group, topic string, lag int64, tags Tags) {
+	tags["consumer_group"] = group
+	tags["topic"] = topic
+
+	fields := map[string]interface{}{
+		"lag": lag,
+	}
+
+	point, _ := influxdb.NewPoint("kafka_snitch_consumer_topic", tags, fields, time.Now())
+	w.Write(point)
+}
+
+func (w *InfluxDBWriter) WriteConsumerPartitionLag(group, topic string, partition int, logEndOffset, consumerOffset, lag int64, tags Tags) {
+	tags["consumer_group"] = group
+	tags["topic"] = topic
+	tags["partition"] = strconv.Itoa(partition)
+
+	fields := map[string]interface{}{
+		"log_end_offset":  logEndOffset,
+		"consumer_offset": consumerOffset,
+		"lag":             lag,
+	}
+
+	point, _ := influxdb.NewPoint("kafka_snitch_consumer_partition", tags, fields, time.Now())
+	w.Write(point)
+}
+
+func (w *InfluxDBWriter) WriteObservationSummary(duration time.Duration, observationCount int64, brokerCount, topicCount, groupCount, partitionCount int, tags Tags) {
+	fields := map[string]interface{}{
+		"duration":        duration.Nanoseconds(),
+		"observations":    observationCount,
+		"brokers":         brokerCount,
+		"consumer_groups": groupCount,
+		"topics":          topicCount,
+		"partitions":      partitionCount,
+	}
+
+	point, _ := influxdb.NewPoint("kafka_snitch_observation", tags, fields, time.Now())
+	w.Write(point)
 }
 
 func newInfluxDBWriter(config *InfluxDBConfig, client influxdb.Client) (*InfluxDBWriter, error) {
@@ -68,7 +106,7 @@ func newInfluxdbClient(config *InfluxDBConfig) (influxdb.Client, error) {
 		return influxdb.NewUDPClient(config.UDPConfig)
 	}
 
-	return DummyMetricsClient{}, nil
+	return nil, errors.New("Configuration does not specify a transport")
 }
 
 func (w *InfluxDBWriter) Write(point *influxdb.Point) {
@@ -99,7 +137,7 @@ func (w *InfluxDBWriter) flushPoints(points []*influxdb.Point) {
 	})
 
 	if err != nil {
-		log.Error("Problem creating batch point! %v", err)
+		log.Errorf("Problem creating batch point! %v", err)
 		return
 	}
 
@@ -150,31 +188,4 @@ func (w *InfluxDBWriter) capturePoints() {
 			break
 		}
 	}
-}
-
-type DummyMetricsClient struct {
-	writeFunc func(influxdb.BatchPoints) error
-	closeFunc func() error
-}
-
-func (d DummyMetricsClient) Write(bp influxdb.BatchPoints) error {
-	if d.writeFunc != nil {
-		return d.writeFunc(bp)
-	}
-	return nil
-}
-
-func (d DummyMetricsClient) Close() error {
-	if d.closeFunc != nil {
-		return d.closeFunc()
-	}
-	return nil
-}
-
-func (d DummyMetricsClient) Query(q influxdb.Query) (*influxdb.Response, error) {
-	return &influxdb.Response{}, nil
-}
-
-func (d DummyMetricsClient) Ping(t time.Duration) (time.Duration, string, error) {
-	return 0 * time.Second, "", nil
 }

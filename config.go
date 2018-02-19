@@ -13,6 +13,7 @@ type SnitchConfig struct {
 	LogLevel  string
 	LogFormat string
 	InfluxDB  InfluxDBConfig
+	StatsD    StatsDConfig
 	Observe   ObserveConfig
 }
 
@@ -27,6 +28,12 @@ type InfluxDBConfig struct {
 	UDPConfig       influxdb.UDPConfig
 	BufferSize      int
 	FlushInterval   int
+}
+
+type StatsDConfig struct {
+	Addr      string
+	TagFormat string
+	//MaxBytes int
 }
 
 type ObserveConfig struct {
@@ -72,10 +79,24 @@ func (config *SnitchConfig) Parse() {
 		"influxdb.retention-policy", "", "The target InfluxDB database retention policy name")
 	flag.StringVar(&config.InfluxDB.Precision,
 		"influxdb.precision", "us", "The precision of points written to InfluxDB: \"s\", \"ms\", \"us\"")
+
+	flag.StringVar(&config.StatsD.Addr,
+		"statsd.addr", "", "The hostname:port of a StatsD UDP endpoint")
+	flag.StringVar(&config.StatsD.TagFormat,
+		"statsd.tagfmt", "none", "The tagging-format of the metric payloads: none, DataDog")
+
 	flag.Parse()
 
 	SetLogFormat(config.LogFormat)
 	SetLogLevel(config.LogLevel)
+}
+
+func (config *SnitchConfig) CanWriteToInfluxDB() bool {
+	return config.InfluxDB.HTTPConfig.Addr != "" || config.InfluxDB.UDPConfig.Addr != ""
+}
+
+func (config *SnitchConfig) CanWriteToStatsD() bool {
+	return config.StatsD.Addr != ""
 }
 
 func SetLogFormat(f string) {

@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/PagerDuty/godspeed"
+  packages = ["."]
+  revision = "6d136386b5f291797c77764dfd2acc950dc27347"
+
+[[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
   revision = "3b1b38866a79f06deddf0487d5c27ba0697ccd65"
@@ -45,7 +51,11 @@
 
 [[projects]]
   name = "github.com/influxdata/influxdb"
-  packages = ["client/v2","models","pkg/escape"]
+  packages = [
+    "client/v2",
+    "models",
+    "pkg/escape"
+  ]
   revision = "76124df5c121e411e99807b9473a03eb785cd43b"
   version = "v1.3.0"
 
@@ -88,6 +98,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d339096b80af2b3328757e2c24258c580ad5238bcba12464bd51701281bb4425"
+  inputs-digest = "3149b7c87fb3ee6d71cb1bee5cc4e6c57298ccb78bb0eb33e5a15eb542df038b"
   solver-name = "gps-cdcl"
   solver-version = 1
