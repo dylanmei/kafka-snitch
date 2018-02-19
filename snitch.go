@@ -178,6 +178,8 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 		}).Debug("Found group")
 
 		for topic, data := range topicSet {
+			var totalLag int64
+
 			offsetsRequest := new(sarama.OffsetFetchRequest)
 			offsetsRequest.Version = 1
 			offsetsRequest.ConsumerGroup = group
@@ -191,6 +193,8 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 					"consumer_group": group,
 					"broker":         broker.ID(),
 				}).Errorf("Could not get offsets: %v", err)
+
+				continue
 			}
 
 			for _, blocks := range offsetsResponse.Blocks {
@@ -205,6 +209,7 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 					if lag < 0 {
 						lag = 0
 					}
+					totalLag += lag
 
 					log.WithFields(log.Fields{
 						"consumer_group": group,
@@ -218,6 +223,8 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 					s.observer.PartitionLag(group, topic, partition, logEndOffset, block.Offset, lag)
 				}
 			}
+
+			s.observer.TopicLag(group, topic, totalLag)
 		}
 	}
 }

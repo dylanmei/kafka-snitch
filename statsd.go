@@ -49,6 +49,21 @@ func NewStatsDWriter(config *StatsDConfig) (*StatsDWriter, error) {
 }
 
 func (w *StatsDWriter) WriteConsumerTopicLag(group, topic string, lag int64, tags Tags) {
+	if w.tagFormat == "datadog" {
+		tags["consumer_group"] = group
+		tags["topic"] = topic
+
+		tagArray := []string{}
+		for name, value := range tags {
+			tagArray = append(tagArray, fmt.Sprintf("%s:%s", name, value))
+		}
+
+		w.gsw.Gauge("consumer.topic.lag", float64(lag), tagArray)
+		return
+	}
+
+	// Need help here. What are the rules for the segments of the metric names?
+	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.lag", group, topic), float64(lag), nil)
 }
 
 func (w *StatsDWriter) WriteConsumerPartitionLag(group, topic string, partition int, logEndOffset, consumerOffset, lag int64, tags Tags) {
