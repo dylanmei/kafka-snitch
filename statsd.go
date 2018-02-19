@@ -2,11 +2,28 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PagerDuty/godspeed"
+)
+
+var (
+	statsdBadChars     = regexp.MustCompile(`[^a-zA-Z0-9-_]`)
+	statsdReplaceChars = strings.NewReplacer(
+		" ", "-",
+		"/", "-",
+		"@", "-",
+		"*", "-",
+	)
+	statsdRemoveChars = strings.NewReplacer(
+		`'`, "",
+		`"`, "",
+		`\`, "",
+		"..", ".",
+	)
 )
 
 type StatsDWriter struct {
@@ -62,8 +79,7 @@ func (w *StatsDWriter) WriteConsumerTopicLag(group, topic string, lag int64, tag
 		return
 	}
 
-	// Need help here. What are the rules for the segments of the metric names?
-	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.lag", group, topic), float64(lag), nil)
+	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.lag", statsdSafeString(group), statsdSafeString(topic)), float64(lag), nil)
 }
 
 func (w *StatsDWriter) WriteConsumerPartitionLag(group, topic string, partition int, logEndOffset, consumerOffset, lag int64, tags Tags) {
@@ -83,8 +99,9 @@ func (w *StatsDWriter) WriteConsumerPartitionLag(group, topic string, partition 
 		return
 	}
 
-	// Need help here. What are the rules for the segments of the metric names?
-	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.partition.%d.lag", group, topic, partition), float64(lag), nil)
+	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.partition.%d.log_end_offset", statsdSafeString(group), statsdSafeString(topic), partition), float64(logEndOffset), nil)
+	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.partition.%d.consumer_offset", statsdSafeString(group), statsdSafeString(topic), partition), float64(consumerOffset), nil)
+	w.gsw.Gauge(fmt.Sprintf("consumer.%s.topic.%s.partition.%d.lag", statsdSafeString(group), statsdSafeString(topic), partition), float64(lag), nil)
 }
 
 func (w *StatsDWriter) WriteObservationSummary(duration time.Duration, observationCount int64, brokerCount, topicCount, groupCount, partitionCount int, tags Tags) {
@@ -104,4 +121,11 @@ func (w *StatsDWriter) WriteObservationSummary(duration time.Duration, observati
 }
 
 func (w *StatsDWriter) Flush() {
+}
+
+func statsdSafeString(value string) string {
+	safeString := value
+	safeString = statsdReplaceChars.Replace(safeString)
+	safeString = statsdRemoveChars.Replace(safeString)
+	return statsdBadChars.ReplaceAllLiteralString(safeString, "_")
 }
