@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
@@ -55,9 +56,6 @@ func (config *SnitchConfig) Parse() {
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")
 
-	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
-	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
-
 	flag.StringVar(&config.InfluxDB.UDPConfig.Addr,
 		"influxdb.udp.addr", "", "The hostname:port of an InfluxDB UDP endpoint")
 	flag.StringVar(&config.InfluxDB.HTTPConfig.Addr,
@@ -72,7 +70,17 @@ func (config *SnitchConfig) Parse() {
 		"influxdb.retention-policy", "", "The target InfluxDB database retention policy name")
 	flag.StringVar(&config.InfluxDB.Precision,
 		"influxdb.precision", "us", "The precision of points written to InfluxDB: \"s\", \"ms\", \"us\"")
+
+	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
+	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
+
+	showVersion := flag.Bool("version", false, "Print the current version")
+
 	flag.Parse()
+	if *showVersion {
+		PrintVersion(os.Stdout)
+		os.Exit(0)
+	}
 
 	SetLogFormat(config.LogFormat)
 	SetLogLevel(config.LogLevel)
