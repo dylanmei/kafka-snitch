@@ -12,8 +12,25 @@ A simple application to observe interesting details from a [Kafka](http://kafka.
 
 - [x] logger
 - [x] influxdb
-- [ ] statsd (in progress)
+- [-] statsd (in progress)
 - [ ] prometheus
+
+# metrics
+
+Observations
+
+- kafka.snitch.observation.brokers
+- kafka.snitch.observation.topics
+- kafka.snitch.observation.consumer_groups
+- kafka.snitch.observation.partitions
+- kafka.snitch.observation.duration.ms
+
+Consumers
+
+- kafka.snitch.consumers.<consumer_group>.topic.<topic>.lag
+- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.log_end_offset
+- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.consumer_offset
+- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.lag
 
 # example
 
