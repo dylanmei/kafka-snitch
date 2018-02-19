@@ -16,6 +16,9 @@ type Snitch struct {
 	client   sarama.Client
 	doneCh   chan bool
 	termCh   chan bool
+
+	runOnce   bool
+	runSnooze time.Duration
 }
 
 func NewSnitch(observer *Observer, config *ObserveConfig) *Snitch {
@@ -52,28 +55,12 @@ func (s *Snitch) Connect(brokers []string) chan bool {
 	return readyCh
 }
 
-func (s *Snitch) Run() {
+func (s *Snitch) Run(snooze time.Duration) {
 	tally := NewTally()
 	for {
 		select {
-		case <-time.After(10 * time.Second):
-			log.Info("Beginning observation")
-			observationStart := time.Now()
-
-			s.observe(tally)
-
-			observationDuration := time.Since(observationStart)
-			s.observer.Observation(observationDuration,
-				tally.BrokerCount(), tally.TopicCount(), tally.GroupCount(), tally.PartitionCount())
-
-			log.WithFields(log.Fields{
-				"brokers":     tally.BrokerCount(),
-				"topics":      tally.TopicCount(),
-				"groups":      tally.GroupCount(),
-				"partitions":  tally.PartitionCount(),
-				"duration_ms": observationDuration.Nanoseconds() / 1000 / 1000,
-			}).Infof("Observation complete in %v", strings.ToLower(units.HumanDuration(observationDuration)))
-
+		case <-time.After(snooze):
+			s.run(tally)
 			tally.Reset()
 			break
 
@@ -84,6 +71,31 @@ func (s *Snitch) Run() {
 			break
 		}
 	}
+}
+
+func (s *Snitch) RunOnce() {
+	s.run(NewTally())
+	s.client.Close()
+	log.Info("Disconnected from the Kafka cluster")
+}
+
+func (s *Snitch) run(tally *Tally) {
+	log.Info("Beginning observation")
+	observationStart := time.Now()
+
+	s.observe(tally)
+
+	observationDuration := time.Since(observationStart)
+	s.observer.Observation(observationDuration,
+		tally.BrokerCount(), tally.TopicCount(), tally.GroupCount(), tally.PartitionCount())
+
+	log.WithFields(log.Fields{
+		"brokers":     tally.BrokerCount(),
+		"topics":      tally.TopicCount(),
+		"groups":      tally.GroupCount(),
+		"partitions":  tally.PartitionCount(),
+		"duration_ms": observationDuration.Nanoseconds() / 1000 / 1000,
+	}).Infof("Observation complete in %v", strings.ToLower(units.HumanDuration(observationDuration)))
 }
 
 func (s *Snitch) observe(tally *Tally) {

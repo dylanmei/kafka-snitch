@@ -33,26 +33,31 @@ func main() {
 		observer.AddWriter(writer)
 	}
 
+	log.Info("Starting snitch")
 	snitch := NewSnitch(observer, &config.Observe)
 	brokers := strings.Split(config.Brokers, ",")
-	log.Infof("Starting snitch")
 
 	select {
 	case <-snitch.Connect(brokers):
-		go snitch.Run()
 		break
 
 	case <-time.After(60 * time.Second):
 		log.Fatal("Couldn't start snitch! Quitting")
 	}
 
-	termCh := make(chan os.Signal)
-	signal.Notify(termCh, os.Interrupt, syscall.SIGTERM)
-	<-termCh
+	if config.RunOnce {
+		snitch.RunOnce()
+	} else {
+		go snitch.Run(config.RunSnooze)
 
-	log.Infof("Stopping snitch")
-	snitch.Close()
+		termCh := make(chan os.Signal)
+		signal.Notify(termCh, os.Interrupt, syscall.SIGTERM)
+		<-termCh
+
+		log.Info("Stopping snitch")
+		snitch.Close()
+	}
+
 	observer.Flush()
-
-	log.Infof("Done!")
+	log.Info("Done!")
 }

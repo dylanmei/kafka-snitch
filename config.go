@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"strconv"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	influxdb "github.com/influxdata/influxdb/client/v2"
@@ -16,6 +17,8 @@ type SnitchConfig struct {
 	InfluxDB  InfluxDBConfig
 	StatsD    StatsDConfig
 	Observe   ObserveConfig
+	RunOnce   bool
+	RunSnooze time.Duration
 }
 
 const LogFormatText = "text"
@@ -77,6 +80,9 @@ func (config *SnitchConfig) Parse() {
 		"influxdb.retention-policy", "", "The target InfluxDB database retention policy name")
 	flag.StringVar(&config.InfluxDB.Precision,
 		"influxdb.precision", "us", "The precision of points written to InfluxDB: \"s\", \"ms\", \"us\"")
+
+	flag.BoolVar(&config.RunOnce, "run.once", false, "Whether to run-and-exit, or run continously")
+	flag.DurationVar(&config.RunSnooze, "run.snooze", time.Duration(10*time.Second), "The amount of time to sleep between observations")
 
 	flag.StringVar(&config.StatsD.Addr,
 		"statsd.addr", "", "The hostname:port of a StatsD UDP endpoint")

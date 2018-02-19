@@ -51,10 +51,16 @@ Usage of bin/kafka-snitch:
     	Logging level: debug, info, warning, error (default "info")
   -observe.broker value
     	A broker-id to include when observing offsets; other brokers will be ignored
+  -run.once
+    	Whether to run-and-exit, or run continously
+  -run.snooze duration
+    	The amount of time to sleep between observations (default 10s)
   -statsd.addr string
     	The hostname:port of a StatsD UDP endpoint
   -statsd.tagfmt string
     	The tagging-format of the metric payloads: none, DataDog (default "none")
+  -version
+    	Print the current version
 ```
 
 Report to InfluxDB and print out debug logs in JSON format, but only for brokers 1:
