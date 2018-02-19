@@ -75,7 +75,7 @@ Usage of bin/kafka-snitch:
   -statsd.addr string
     	The hostname:port of a StatsD UDP endpoint
   -statsd.tagfmt string
-    	The tagging-format of the metric payloads: none, DataDog (default "none")
+    	The tagging-format of metric payloads: none, datadog (default "none")
   -version
     	Print the current version
 ```

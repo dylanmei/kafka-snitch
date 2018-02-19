@@ -10,6 +10,9 @@ import (
 	"github.com/PagerDuty/godspeed"
 )
 
+const TagFmtDataDog = "datadog"
+const TagFmtNone = "none"
+
 var (
 	statsdBadChars     = regexp.MustCompile(`[^a-zA-Z0-9-_]`)
 	statsdReplaceChars = strings.NewReplacer(
@@ -66,7 +69,7 @@ func NewStatsDWriter(config *StatsDConfig) (*StatsDWriter, error) {
 }
 
 func (w *StatsDWriter) WriteConsumerTopicLag(group, topic string, lag int64, tags Tags) {
-	if w.tagFormat == "datadog" {
+	if w.tagFormat == TagFmtDataDog {
 		tags["consumer_group"] = group
 		tags["topic"] = topic
 
@@ -83,7 +86,7 @@ func (w *StatsDWriter) WriteConsumerTopicLag(group, topic string, lag int64, tag
 }
 
 func (w *StatsDWriter) WriteConsumerPartitionLag(group, topic string, partition int, logEndOffset, consumerOffset, lag int64, tags Tags) {
-	if w.tagFormat == "datadog" {
+	if w.tagFormat == TagFmtDataDog {
 		tags["consumer_group"] = group
 		tags["topic"] = topic
 		tags["partition"] = strconv.Itoa(partition)
@@ -106,7 +109,7 @@ func (w *StatsDWriter) WriteConsumerPartitionLag(group, topic string, partition 
 
 func (w *StatsDWriter) WriteObservationSummary(duration time.Duration, observationCount int64, brokerCount, topicCount, groupCount, partitionCount int, tags Tags) {
 	tagArray := []string{}
-	if w.tagFormat == "datadog" {
+	if w.tagFormat == TagFmtDataDog {
 		for name, value := range tags {
 			tagArray = append(tagArray, fmt.Sprintf("%s:%s", name, value))
 		}

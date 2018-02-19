@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -87,7 +88,7 @@ func (config *SnitchConfig) Parse() {
 	flag.StringVar(&config.StatsD.Addr,
 		"statsd.addr", "", "The hostname:port of a StatsD UDP endpoint")
 	flag.StringVar(&config.StatsD.TagFormat,
-		"statsd.tagfmt", "none", "The tagging-format of the metric payloads: none, DataDog")
+		"statsd.tagfmt", TagFmtNone, fmt.Sprintf("The tagging-format of metric payloads: %s, %s", TagFmtNone, TagFmtDataDog))
 
 	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
 	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
