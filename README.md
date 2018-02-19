@@ -12,39 +12,39 @@ A simple application to observe interesting details from a [Kafka](http://kafka.
 
 - [x] logger
 - [x] influxdb
-- [-] statsd (in progress)
+- [x] statsd (in progress)
 - [ ] prometheus
 
 # metrics
 
 Observations
 
-- kafka.snitch.observation.brokers
-- kafka.snitch.observation.topics
-- kafka.snitch.observation.consumer_groups
-- kafka.snitch.observation.partitions
-- kafka.snitch.observation.duration.ms
+- `kafka.snitch.observation.brokers`
+- `kafka.snitch.observation.topics`
+- `kafka.snitch.observation.consumer_groups`
+- `kafka.snitch.observation.partitions`
+- `kafka.snitch.observation.duration.ms`
 
 Consumers
 
-- kafka.snitch.consumers.<consumer_group>.topic.<topic>.lag
-- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.log_end_offset
-- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.consumer_offset
-- kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.lag
+- `kafka.snitch.consumers.<consumer_group>.topic.<topic>.lag`
+- `kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.log_end_offset`
+- `kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.consumer_offset`
+- `kafka.snitch.consumers.<consumer_group>.topic.<topic>.partition.<partition>.lag`
 
 # example
 
 Build and run `kafka-snitch`
 
 ```
-make
-bin/kafka-snitch -brokers=localhost:9092
+$ make
+$ bin/kafka-snitch -brokers=localhost:9092 -log.level=debug
 ```
 
 Show the help
 
 ```
-$ kafka-snitch --help
+$ bin/kafka-snitch --help
 Usage of bin/kafka-snitch:
   -brokers string
     	The hostname:port of one or more Kafka brokers
@@ -80,11 +80,10 @@ Usage of bin/kafka-snitch:
     	Print the current version
 ```
 
-Report to InfluxDB and print out debug logs in JSON format, but only for brokers 1:
+Report to InfluxDB and print out debug logs in JSON format, but only for broker 1:
 
 ```
-make
-bin/kafka-snitch -brokers=localhost:9092 \
+$ bin/kafka-snitch -brokers=localhost:9092 \
   -influxdb.http.url=http://localhost:8081 \
   -log.level=debug -log.format=json \
   -observe.broker=1
