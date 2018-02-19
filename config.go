@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
@@ -62,9 +63,6 @@ func (config *SnitchConfig) Parse() {
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")
 
-	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
-	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
-
 	flag.StringVar(&config.InfluxDB.UDPConfig.Addr,
 		"influxdb.udp.addr", "", "The hostname:port of an InfluxDB UDP endpoint")
 	flag.StringVar(&config.InfluxDB.HTTPConfig.Addr,
@@ -85,7 +83,16 @@ func (config *SnitchConfig) Parse() {
 	flag.StringVar(&config.StatsD.TagFormat,
 		"statsd.tagfmt", "none", "The tagging-format of the metric payloads: none, DataDog")
 
+	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
+	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
+
+	showVersion := flag.Bool("version", false, "Print the current version")
+
 	flag.Parse()
+	if *showVersion {
+		PrintVersion(os.Stdout)
+		os.Exit(0)
+	}
 
 	SetLogFormat(config.LogFormat)
 	SetLogLevel(config.LogLevel)
