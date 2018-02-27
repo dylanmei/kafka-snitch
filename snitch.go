@@ -232,7 +232,10 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 					}).Debugf("Observed %s consumer group on topic %s, partition %d", group, topic, partition)
 
 					tally.Add(broker.ID(), topic, group, partition)
-					s.observer.PartitionLag(group, topic, partition, logEndOffset, block.Offset, lag)
+
+					if s.config.Partitions {
+						s.observer.PartitionLag(group, topic, partition, logEndOffset, block.Offset, lag)
+					}
 				}
 			}
 

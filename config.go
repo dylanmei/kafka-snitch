@@ -42,7 +42,8 @@ type StatsDConfig struct {
 }
 
 type ObserveConfig struct {
-	Brokers IDArray
+	Brokers    IDArray
+	Partitions bool
 }
 
 type IDArray []int
@@ -66,6 +67,8 @@ func (config *SnitchConfig) Parse() {
 
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")
+	flag.BoolVar(&config.Observe.Partitions,
+		"observe.partitions", false, "Whether to observe the lag on each individual partition")
 
 	flag.StringVar(&config.InfluxDB.UDPConfig.Addr,
 		"influxdb.udp.addr", "", "The hostname:port of an InfluxDB UDP endpoint")

@@ -68,6 +68,8 @@ Usage of bin/kafka-snitch:
     	Logging level: debug, info, warning, error (default "info")
   -observe.broker value
     	A broker-id to include when observing offsets; other brokers will be ignored
+  -observe.partitions
+    	Whether to observe the lag on each individual partition
   -run.once
     	Whether to run-and-exit, or run continously
   -run.snooze duration
@@ -86,6 +88,7 @@ Report to InfluxDB and print out debug logs in JSON format, but only for broker 
 $ bin/kafka-snitch -brokers=localhost:9092 \
   -influxdb.http.url=http://localhost:8081 \
   -log.level=debug -log.format=json \
+  -observe.partitions=true \
   -observe.broker=1
 ```
 
