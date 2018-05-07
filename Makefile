@@ -28,6 +28,8 @@ docker/push: docker/build
 
 	@docker tag kafka-snitch dylanmei/kafka-snitch:$(TAG)
 	@docker push dylanmei/kafka-snitch:$(TAG)
+	@docker tag kafka-snitch dylanmei/kafka-snitch:latest
+	@docker push dylanmei/kafka-snitch:latest
 
 clean:
 	@rm -rf bin/
