@@ -191,6 +191,7 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 
 		for topic, data := range topicSet {
 			var totalLag int64
+			var hasOffsets bool
 
 			offsetsRequest := new(sarama.OffsetFetchRequest)
 			offsetsRequest.Version = 1
@@ -216,7 +217,9 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 						continue
 					}
 
+					hasOffsets = true
 					logEndOffset := data[partition]
+
 					lag := logEndOffset - block.Offset
 					if lag < 0 {
 						lag = 0
@@ -239,7 +242,9 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 				}
 			}
 
-			s.observer.TopicLag(group, topic, totalLag)
+			if hasOffsets {
+				s.observer.TopicLag(group, topic, totalLag)
+			}
 		}
 	}
 }
