@@ -99,7 +99,7 @@ func (s *Snitch) run(tally *Tally) {
 }
 
 func (s *Snitch) observe(tally *Tally) {
-	log.Debug("Refreshing topics.")
+	log.Debug("Refreshing topics")
 
 	topicSet := make(TopicSet)
 	s.client.RefreshMetadata()
@@ -110,15 +110,18 @@ func (s *Snitch) observe(tally *Tally) {
 		return
 	}
 
+	log.Debugf("Found %d topics", len(topics))
+
 	for _, topic := range topics {
 		// Don't include internal topics
 		if strings.HasPrefix(topic, "__") {
+			log.Debugf("Skipping %s topic", topic)
 			continue
 		}
 
 		partitions, err := s.client.Partitions(topic)
 		if err != nil {
-			log.Errorf("Problem fetching partitions! %v", err.Error())
+			log.Errorf("Problem fetching %s partitions! %v", topic, err.Error())
 			continue
 		}
 
@@ -159,7 +162,7 @@ func (s *Snitch) observe(tally *Tally) {
 		log.WithFields(log.Fields{
 			"broker": broker.ID(),
 			"addr":   broker.Addr(),
-		}).Debugf("Connected to broker %s", broker.ID())
+		}).Debugf("Connected to broker %d", broker.ID())
 
 		wg.Add(1)
 
