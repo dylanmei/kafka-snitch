@@ -33,6 +33,15 @@ func main() {
 		observer.AddWriter(writer)
 	}
 
+	if config.CanServePrometheus() {
+		writer, err := NewPrometheusExporter(&config.Prometheus)
+		if err != nil {
+			log.Panicf("Problem with Prometheus config! %v", err)
+		}
+
+		observer.AddWriter(writer)
+	}
+
 	log.Info("Starting snitch")
 	snitch := NewSnitch(observer, &config.Observe)
 	brokers := strings.Split(config.Brokers, ",")

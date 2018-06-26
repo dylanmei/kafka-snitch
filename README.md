@@ -12,8 +12,8 @@ A simple application to observe interesting details from a [Kafka](http://kafka.
 
 - [x] logger
 - [x] influxdb
-- [x] statsd (in progress)
-- [ ] prometheus
+- [x] statsd
+- [x] prometheus
 
 # metrics
 
@@ -70,6 +70,10 @@ Usage of bin/kafka-snitch:
     	A broker-id to include when observing offsets; other brokers will be ignored
   -observe.partitions
     	Whether to observe the lag on each individual partition
+  -prometheus.web-addr string
+    	The hostname:port to bind for the Prometheus web interface
+  -prometheus.web-path string
+    	The path to expose Prometheus metrics (default "/metrics")
   -run.once
     	Whether to run-and-exit, or run continously
   -run.snooze duration

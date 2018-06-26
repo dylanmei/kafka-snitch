@@ -12,14 +12,15 @@ import (
 )
 
 type SnitchConfig struct {
-	Brokers   string
-	LogLevel  string
-	LogFormat string
-	InfluxDB  InfluxDBConfig
-	StatsD    StatsDConfig
-	Observe   ObserveConfig
-	RunOnce   bool
-	RunSnooze time.Duration
+	Brokers    string
+	LogLevel   string
+	LogFormat  string
+	InfluxDB   InfluxDBConfig
+	StatsD     StatsDConfig
+	Prometheus PrometheusConfig
+	Observe    ObserveConfig
+	RunOnce    bool
+	RunSnooze  time.Duration
 }
 
 const LogFormatText = "text"
@@ -39,6 +40,12 @@ type StatsDConfig struct {
 	Addr      string
 	TagFormat string
 	//MaxBytes int
+}
+
+type PrometheusConfig struct {
+	Namespace string
+	WebAddr   string
+	WebPath   string
 }
 
 type ObserveConfig struct {
@@ -93,6 +100,11 @@ func (config *SnitchConfig) Parse() {
 	flag.StringVar(&config.StatsD.TagFormat,
 		"statsd.tagfmt", TagFmtNone, fmt.Sprintf("The tagging-format of metric payloads: %s, %s", TagFmtNone, TagFmtDataDog))
 
+	flag.StringVar(&config.Prometheus.WebAddr,
+		"prometheus.web-addr", "", "The hostname:port to bind for the Prometheus web interface")
+	flag.StringVar(&config.Prometheus.WebPath,
+		"prometheus.web-path", "/metrics", "The path to expose Prometheus metrics")
+
 	flag.StringVar(&config.LogLevel, "log.level", log.InfoLevel.String(), "Logging level: debug, info, warning, error")
 	flag.StringVar(&config.LogFormat, "log.format", LogFormatText, "Logging format: text, json")
 
@@ -114,6 +126,10 @@ func (config *SnitchConfig) CanWriteToInfluxDB() bool {
 
 func (config *SnitchConfig) CanWriteToStatsD() bool {
 	return config.StatsD.Addr != ""
+}
+
+func (config *SnitchConfig) CanServePrometheus() bool {
+	return config.Prometheus.WebAddr != ""
 }
 
 func SetLogFormat(f string) {
