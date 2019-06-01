@@ -30,7 +30,7 @@ type TopicSet map[string]map[int32]int64
 func (s *Snitch) Connect(brokers []string) chan bool {
 	config := sarama.NewConfig()
 	config.ClientID = "kafka-snitch"
-	config.Version = sarama.V0_9_0_0
+	config.Version = sarama.V0_10_0_0
 
 	readyCh := make(chan bool)
 	retryTimeout := 10 * time.Second
