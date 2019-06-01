@@ -68,6 +68,10 @@ Usage of bin/kafka-snitch:
     	Logging level: debug, info, warning, error (default "info")
   -observe.broker value
     	A broker-id to include when observing offsets; other brokers will be ignored
+  -observe.match.groups string
+    	A glob pattern of groups to observe
+  -observe.match.topics string
+    	A glob pattern of topics to observe (default "[!_]*")
   -observe.partitions
     	Whether to observe the lag on each individual partition
   -prometheus.web-addr string

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gobwas/glob"
 	log "github.com/sirupsen/logrus"
 	influxdb "github.com/influxdata/influxdb/client/v2"
 )
@@ -51,6 +52,8 @@ type PrometheusConfig struct {
 type ObserveConfig struct {
 	Brokers    IDArray
 	Partitions bool
+	Topics glob.Glob
+	Groups glob.Glob
 }
 
 type IDArray []int
@@ -76,6 +79,14 @@ func (config *SnitchConfig) Parse() {
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")
 	flag.BoolVar(&config.Observe.Partitions,
 		"observe.partitions", false, "Whether to observe the lag on each individual partition")
+
+	var matchTopics string
+	var matchGroups string
+
+	flag.StringVar(&matchTopics,
+		"observe.match.topics", "[!_]*", "A glob pattern of topics to observe")
+	flag.StringVar(&matchGroups,
+		"observe.match.groups", "", "A glob pattern of groups to observe")
 
 	flag.StringVar(&config.InfluxDB.UDPConfig.Addr,
 		"influxdb.udp.addr", "", "The hostname:port of an InfluxDB UDP endpoint")
@@ -111,9 +122,17 @@ func (config *SnitchConfig) Parse() {
 	showVersion := flag.Bool("version", false, "Print the current version")
 
 	flag.Parse()
+
 	if *showVersion {
 		PrintVersion(os.Stdout)
 		os.Exit(0)
+	}
+
+	if matchTopics != "" {
+		config.Observe.Topics = glob.MustCompile(matchTopics)
+	}
+	if matchGroups != "" {
+		config.Observe.Groups = glob.MustCompile(matchGroups)
 	}
 
 	SetLogFormat(config.LogFormat)

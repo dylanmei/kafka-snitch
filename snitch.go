@@ -113,9 +113,8 @@ func (s *Snitch) observe(tally *Tally) {
 	log.Debugf("Found %d topics", len(topics))
 
 	for _, topic := range topics {
-		// Don't include internal topics
-		if strings.HasPrefix(topic, "__") {
-			log.Debugf("Skipping %s topic", topic)
+		if !s.canObserveTopic(topic) {
+			//log.Debugf("Skipping %s topic", topic)
 			continue
 		}
 
@@ -187,6 +186,11 @@ func (s *Snitch) observeBroker(tally *Tally, broker *sarama.Broker, topicSet Top
 	}
 
 	for group, protocolType := range groupsResponse.Groups {
+		if !s.canObserveGroup(group) {
+			//log.Debugf("Skipping %s group", group)
+			continue
+		}
+
 		log.WithFields(log.Fields{
 			"group":        group,
 			"protocolType": protocolType,
@@ -267,6 +271,13 @@ func (s *Snitch) canObserveBroker(broker *sarama.Broker) bool {
 	return false
 }
 
+func (s *Snitch) canObserveTopic(topic string) bool {
+	return s.config.Topics != nil && s.config.Topics.Match(topic)
+}
+
+func (s *Snitch) canObserveGroup(group string) bool {
+	return s.config.Groups != nil && s.config.Groups.Match(group)
+}
 func (s *Snitch) Close() {
 	s.doneCh <- true
 	<-s.termCh
