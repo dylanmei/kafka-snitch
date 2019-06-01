@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-const Version = "0.3"
+const Version = "0.4"
 
 var Revision string
 
