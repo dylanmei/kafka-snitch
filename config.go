@@ -92,9 +92,9 @@ func (config *SnitchConfig) Parse() {
 	flag.StringVar(&config.Connect.SASL.Mechanism,
 		"sasl.mechanism", "", "SASL mechanism to use for authentication")
 	flag.StringVar(&config.Connect.SASL.Username,
-		"sasl.username", "", "SASL username for use with the SASL-SCRAM mechanisms")
+		"sasl.username", "", "SASL username for use with the PLAIN and SCRAM mechanisms")
 	flag.StringVar(&config.Connect.SASL.Password,
-		"sasl.password", "", "SASL password for use with the SASL-SCRAM mechanisms")
+		"sasl.password", "", "SASL password for use with the PLAIN and SCRAM mechanisms")
 
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")

@@ -1,7 +1,7 @@
 kafka-snitch
 ------------
 
-A simple application to observe interesting details from a [Kafka](http://kafka.apache.org) 0.9+ cluster, including consumer group lag.
+A simple application to observe interesting details from a [Kafka](http://kafka.apache.org) 0.10+ cluster, including consumer group lag.
 
 `kafka-snitch` observes these details:
 
@@ -82,6 +82,14 @@ Usage of bin/kafka-snitch:
     	Whether to run-and-exit, or run continously
   -run.snooze duration
     	The amount of time to sleep between observations (default 10s)
+  -sasl.mechanism string
+    	SASL mechanism to use for authentication
+  -sasl.password string
+    	SASL password for use with the PLAIN and SCRAM mechanisms
+  -sasl.username string
+    	SASL username for use with the PLAIN and SCRAM mechanisms
+  -security.protocol string
+    	Protocol used to communicate with the brokers (default "PLAINTEXT")
   -statsd.addr string
     	The hostname:port of a StatsD UDP endpoint
   -statsd.tagfmt string
