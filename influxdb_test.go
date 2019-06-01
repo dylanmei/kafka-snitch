@@ -30,6 +30,10 @@ func (d DummyMetricsClient) Query(q influxdb.Query) (*influxdb.Response, error) 
 	return &influxdb.Response{}, nil
 }
 
+func (d DummyMetricsClient) QueryAsChunk(q influxdb.Query) (*influxdb.ChunkedResponse, error) {
+	return &influxdb.ChunkedResponse{}, nil
+}
+
 func (d DummyMetricsClient) Ping(t time.Duration) (time.Duration, string, error) {
 	return 0 * time.Second, "", nil
 }

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	influxdb "github.com/influxdata/influxdb/client/v2"
 )
 
