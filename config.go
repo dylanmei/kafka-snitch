@@ -8,20 +8,26 @@ import (
 	"time"
 
 	"github.com/gobwas/glob"
-	log "github.com/sirupsen/logrus"
 	influxdb "github.com/influxdata/influxdb/client/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 type SnitchConfig struct {
 	Brokers    string
-	LogLevel   string
-	LogFormat  string
+	Connect    ConnectConfig
 	InfluxDB   InfluxDBConfig
 	StatsD     StatsDConfig
 	Prometheus PrometheusConfig
 	Observe    ObserveConfig
+	LogLevel   string
+	LogFormat  string
 	RunOnce    bool
 	RunSnooze  time.Duration
+}
+
+type ConnectConfig struct {
+	Protocol string
+	SASL     SASLConfig
 }
 
 const LogFormatText = "text"
@@ -52,8 +58,14 @@ type PrometheusConfig struct {
 type ObserveConfig struct {
 	Brokers    IDArray
 	Partitions bool
-	Topics glob.Glob
-	Groups glob.Glob
+	Topics     glob.Glob
+	Groups     glob.Glob
+}
+
+type SASLConfig struct {
+	Mechanism string
+	Password  string
+	Username  string
 }
 
 type IDArray []int
@@ -74,6 +86,15 @@ func (a *IDArray) Set(value string) error {
 func (config *SnitchConfig) Parse() {
 	flag.StringVar(&config.Brokers,
 		"brokers", "", "The hostname:port of one or more Kafka brokers")
+
+	flag.StringVar(&config.Connect.Protocol,
+		"security.protocol", "PLAINTEXT", "Protocol used to communicate with the brokers")
+	flag.StringVar(&config.Connect.SASL.Mechanism,
+		"sasl.mechanism", "", "SASL mechanism to use for authentication")
+	flag.StringVar(&config.Connect.SASL.Username,
+		"sasl.username", "", "SASL username for use with the SASL-SCRAM mechanisms")
+	flag.StringVar(&config.Connect.SASL.Password,
+		"sasl.password", "", "SASL password for use with the SASL-SCRAM mechanisms")
 
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")

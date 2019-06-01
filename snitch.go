@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
 	units "github.com/docker/go-units"
+	log "github.com/sirupsen/logrus"
 )
 
 type Snitch struct {
@@ -27,10 +27,29 @@ func NewSnitch(observer *Observer, config *ObserveConfig) *Snitch {
 
 type TopicSet map[string]map[int32]int64
 
-func (s *Snitch) Connect(brokers []string) chan bool {
+func (s *Snitch) Connect(brokers []string, connectConfig *ConnectConfig) chan bool {
 	config := sarama.NewConfig()
 	config.ClientID = "kafka-snitch"
 	config.Version = sarama.V0_10_0_0
+
+	if connectConfig.Protocol == "SSL" || connectConfig.Protocol == "SASL_SSL" {
+		config.Net.TLS.Enable = true
+	}
+
+	if connectConfig.Protocol == "SASL_PLAINTEXT" || connectConfig.Protocol == "SASL_SSL" {
+		config.Net.SASL.Enable = true
+		config.Net.SASL.User = connectConfig.SASL.Username
+		config.Net.SASL.Password = connectConfig.SASL.Password
+
+		if connectConfig.SASL.Mechanism == "SCRAM-SHA-256" {
+			config.Net.SASL.Mechanism = sarama.SASLMechanism(sarama.SASLTypeSCRAMSHA256)
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA256} }
+		}
+		if connectConfig.SASL.Mechanism == "SCRAM-SHA-512" {
+			config.Net.SASL.Mechanism = sarama.SASLMechanism(sarama.SASLTypeSCRAMSHA512)
+			config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+		}
+	}
 
 	readyCh := make(chan bool)
 	retryTimeout := 10 * time.Second

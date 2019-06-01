@@ -47,7 +47,7 @@ func main() {
 	brokers := strings.Split(config.Brokers, ",")
 
 	select {
-	case <-snitch.Connect(brokers):
+	case <-snitch.Connect(brokers, &config.Connect):
 		break
 
 	case <-time.After(60 * time.Second):

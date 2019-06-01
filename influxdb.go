@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	influxdb "github.com/influxdata/influxdb/client/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 type InfluxDBWriter struct {
