@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"strings"
 	"sync"
 	"time"
@@ -34,6 +35,9 @@ func (s *Snitch) Connect(brokers []string, connectConfig *ConnectConfig) chan bo
 
 	if connectConfig.Protocol == "SSL" || connectConfig.Protocol == "SASL_SSL" {
 		config.Net.TLS.Enable = true
+		config.Net.TLS.Config = &tls.Config{
+			InsecureSkipVerify: connectConfig.TLS.SkipVerify,
+		}
 	}
 
 	if connectConfig.Protocol == "SASL_PLAINTEXT" || connectConfig.Protocol == "SASL_SSL" {

@@ -28,6 +28,7 @@ type SnitchConfig struct {
 type ConnectConfig struct {
 	Protocol string
 	SASL     SASLConfig
+	TLS      TLSConfig
 }
 
 const LogFormatText = "text"
@@ -60,6 +61,10 @@ type ObserveConfig struct {
 	Partitions bool
 	Topics     glob.Glob
 	Groups     glob.Glob
+}
+
+type TLSConfig struct {
+	SkipVerify bool
 }
 
 type SASLConfig struct {
@@ -95,6 +100,8 @@ func (config *SnitchConfig) Parse() {
 		"sasl.username", "", "SASL username for use with the PLAIN and SCRAM mechanisms")
 	flag.StringVar(&config.Connect.SASL.Password,
 		"sasl.password", "", "SASL password for use with the PLAIN and SCRAM mechanisms")
+	flag.BoolVar(&config.Connect.TLS.SkipVerify,
+		"tls.skip.verify", false, "Whether to verify the server certificate")
 
 	flag.Var(&config.Observe.Brokers,
 		"observe.broker", "A broker-id to include when observing offsets; other brokers will be ignored")
