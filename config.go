@@ -149,6 +149,13 @@ func (config *SnitchConfig) Parse() {
 		os.Exit(0)
 	}
 
+	if config.Connect.SASL.Username == "" {
+		config.Connect.SASL.Username = os.Getenv("SASL_USERNAME")
+	}
+	if config.Connect.SASL.Password == "" {
+		config.Connect.SASL.Password = os.Getenv("SASL_PASSWORD")
+	}
+
 	if matchTopics != "" {
 		config.Observe.Topics = glob.MustCompile(matchTopics)
 	}
