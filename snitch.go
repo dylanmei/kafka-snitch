@@ -291,11 +291,19 @@ func (s *Snitch) canObserveBroker(broker *sarama.Broker) bool {
 }
 
 func (s *Snitch) canObserveTopic(topic string) bool {
-	return s.config.Topics != nil && s.config.Topics.Match(topic)
+	if s.config.Topics == nil {
+		return true
+	}
+
+	return s.config.Topics.Match(topic)
 }
 
 func (s *Snitch) canObserveGroup(group string) bool {
-	return s.config.Groups != nil && s.config.Groups.Match(group)
+	if s.config.Groups == nil {
+		return true
+	}
+
+	return s.config.Groups.Match(group)
 }
 func (s *Snitch) Close() {
 	s.doneCh <- true
